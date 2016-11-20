@@ -43,11 +43,21 @@
         term-list (get-terms-list file)
         term-counts (frequencies term-list)]
     {:file file-name
-      :terms (calculate-tf term-counts)}))
+     :terms (calculate-tf term-counts)}))
 
 (defn get-idf [m]
   (-> (per-term-doc-count m)
     (calculate-idf (count m))))
+
+(defn get-tf-idf [m n]
+  (loop [tf-idf-map (empty '())
+         l (first m)
+         r (rest m)]
+    (if l
+      (recur (conj tf-idf-map (calculate-tf-idf l n))
+             (first r)
+             (rest r))
+      tf-idf-map)))
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -57,8 +67,4 @@
         term-tf (doall (map get-tf files))
         all-terms (per-term-doc-count term-tf)
         term-idf (get-idf term-tf)]
-    (calculate-tf-idf (second term-tf) term-idf)))
-    ;; (:file (calculate-tf-idf (second term-tf) term-idf))))
-        ;; term-idf (get-idf term-frequencies (count files))]
-    ;; (keys term-frequencies))))
-    ;; (doall (map get-tf files))))
+    (get-tf-idf term-tf term-idf)))
