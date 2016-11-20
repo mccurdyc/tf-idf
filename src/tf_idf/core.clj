@@ -12,9 +12,12 @@
 (defn get-terms-list [s]
   (st/split s #" "))
 
+(defn get-terms [m]
+  (get-in m [:terms]))
+
 (defn per-term-doc-count [m]
   "make list of all keys from nested maps"
-  (frequencies (flatten (conj '() (map keys m)))))
+  (frequencies (flatten (conj '() (map keys (map get-terms m))))))
 
 (defn calculate-tf [m]
   "divide occurrences of a term by the total number of terms in a single document"
@@ -26,14 +29,19 @@
 
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
-  (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) tf))
+  (let [file-name (get tf :file)
+        tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-terms tf))]
+    {:file file-name
+     :tf-idf tf-idf}))
 
 (defn get-tf [f]
   "remove punctuation from file. get all terms from file. get occurrences of each term. calculate term frequency."
-  (let [file (clean-file f)
+  (let [file-name (.getName f)
+        file (clean-file f)
         term-list (get-terms-list file)
         term-counts (frequencies term-list)]
-    (calculate-tf term-counts)))
+    {:file file-name
+      :terms (calculate-tf term-counts)}))
 
 (defn get-idf [m]
   (let [term-doc-count (per-term-doc-count m)]
@@ -48,6 +56,7 @@
         all-terms (per-term-doc-count term-tf)
         term-idf (get-idf term-tf)]
     (calculate-tf-idf (second term-tf) term-idf)))
+    ;; (:file (calculate-tf-idf (second term-tf) term-idf))))
         ;; term-idf (get-idf term-frequencies (count files))]
     ;; (keys term-frequencies))))
     ;; (doall (map get-tf files))))
