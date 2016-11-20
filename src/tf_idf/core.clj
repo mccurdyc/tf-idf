@@ -12,24 +12,42 @@
 (defn get-terms-list [s]
   (st/split s #" "))
 
-(defn calculate-tf [m v]
- (float (/ v (count m))))
+(defn per-term-doc-count [m]
+  "make list of all keys from nested maps"
+  (frequencies (flatten (conj '() (map keys m)))))
 
-(defn update-map [f coll]
-  (reduce-kv (fn [m k v] (assoc m k (f coll v))) (empty coll) coll))
+(defn calculate-tf [m]
+  "divide occurrences of a term by the total number of terms in a single document"
+  (reduce-kv (fn [n k v] (assoc n k (float (/ v (count m))))) (empty m) m))
 
-(defn calculate-tf-idf [f]
+(defn calculate-idf [m c]
+  "divide total number of documents by number of documents with term. then, take the log_e"
+  (reduce-kv (fn [n k v] (assoc n k (Math/log (float (/ c v))))) (empty m) m))
+
+(defn calculate-tf-idf [tf idf]
+  "calculate tf-idf (tf * idf) for a term"
+  (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) tf))
+
+(defn get-tf [f]
+  "remove punctuation from file. get all terms from file. get occurrences of each term. calculate term frequency."
   (let [file (clean-file f)
         term-list (get-terms-list file)
         term-counts (frequencies term-list)]
-        (update-map calculate-tf term-counts)))
-        ;; term-frequency (update-map calculate-tf term-counts)]))
+    (calculate-tf term-counts)))
+
+(defn get-idf [m]
+  (let [term-doc-count (per-term-doc-count m)]
+    (calculate-idf term-doc-count (count m))))
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (println "Provide a directory:")
   (let [files (.listFiles (io/file (read-line)))
-        all-terms (doall (map get-terms files))
-        freqs (doall (map frequencies all-terms))]
-    (doall (map update-map calculate-tf freqs))))
+        term-tf (doall (map get-tf files))
+        all-terms (per-term-doc-count term-tf)
+        term-idf (get-idf term-tf)]
+    (calculate-tf-idf (second term-tf) term-idf)))
+        ;; term-idf (get-idf term-frequencies (count files))]
+    ;; (keys term-frequencies))))
+    ;; (doall (map get-tf files))))
