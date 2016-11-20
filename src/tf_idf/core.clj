@@ -7,17 +7,19 @@
 (def non-word-regex #"[^(? )\w]")
 
 (defn clean-file [f]
-  (st/lower-case (st/replace (slurp f) non-word-regex "")))
+  (-> (slurp f)
+      (st/replace non-word-regex "")
+      st/lower-case))
 
 (defn get-terms-list [s]
   (st/split s #" "))
 
-(defn get-terms [m]
+(defn get-in-terms [m]
   (get-in m [:terms]))
 
 (defn per-term-doc-count [m]
   "make list of all keys from nested maps"
-  (frequencies (flatten (conj '() (map keys (map get-terms m))))))
+  (frequencies (flatten (conj '() (map keys (map get-in-terms m))))))
 
 (defn calculate-tf [m]
   "divide occurrences of a term by the total number of terms in a single document"
@@ -30,7 +32,7 @@
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
   (let [file-name (get tf :file)
-        tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-terms tf))]
+        tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-in-terms tf))]
     {:file file-name
      :tf-idf tf-idf}))
 
@@ -44,8 +46,8 @@
       :terms (calculate-tf term-counts)}))
 
 (defn get-idf [m]
-  (let [term-doc-count (per-term-doc-count m)]
-    (calculate-idf term-doc-count (count m))))
+  (-> (per-term-doc-count m)
+    (calculate-idf (count m))))
 
 (defn -main
   "I don't do a whole lot ... yet."
