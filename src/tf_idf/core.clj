@@ -6,6 +6,10 @@
 ;; currently removes accented characters like: â, ê, etc.
 (def non-word-regex #"[^(? )\w]")
 
+(defn get-basename-string [s]
+  "get basename of (string) file"
+  (re-find (re-pattern ".*[^.txt]") s))
+
 (defn clean-file [f]
   (-> (slurp f)
       (st/replace non-word-regex "")
@@ -46,10 +50,12 @@
      :terms (calculate-tf term-counts)}))
 
 (defn get-idf [m]
+  "count number of documents term occurs in then calculate inverse document frequency for terms"
   (-> (per-term-doc-count m)
     (calculate-idf (count m))))
 
 (defn get-tf-idf [m n]
+  "loop through all term-frequency maps and calculate tf-idf for each one"
   (loop [tf-idf-map (empty '())
          l (first m)
          r (rest m)]
@@ -59,6 +65,14 @@
              (rest r))
       tf-idf-map)))
 
+(defn output-to-file [m]
+  (let [base-file-name (get-basename-string (get m :file))
+        output-file (io/file (str (System/getProperty "user.dir") "/output/" base-file-name "-output.txt"))]
+    ;; (if (.exists output-file)
+      ;; (spit output-file (get m :tf-idf))
+      (.mkdir (io/file (.getParent output-file)))
+      (spit output-file (get m :tf-idf))))
+
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
@@ -66,5 +80,6 @@
   (let [files (.listFiles (io/file (read-line)))
         term-tf (doall (map get-tf files))
         all-terms (per-term-doc-count term-tf)
-        term-idf (get-idf term-tf)]
-    (get-tf-idf term-tf term-idf)))
+        term-idf (get-idf term-tf)
+        term-tf-idf (get-tf-idf term-tf term-idf)]
+    (map output-to-file term-tf-idf)))
