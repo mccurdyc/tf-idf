@@ -67,11 +67,11 @@
 
 (defn output-to-file [m]
   (let [base-file-name (get-basename-string (get m :file))
-        output-file (io/file (str (System/getProperty "user.dir") "/output/" base-file-name "-output.txt"))]
-    ;; (if (.exists output-file)
-      ;; (spit output-file (get m :tf-idf))
-      (.mkdir (io/file (.getParent output-file)))
-      (spit output-file (get m :tf-idf))))
+        output-file (str (System/getProperty "user.dir") "/output/" base-file-name "-output.txt")]
+    (.mkdir (io/file (.getParent (io/file output-file))))
+    (with-open [wrtr (io/writer output-file)]
+      (doseq [[k v] (get m :tf-idf)]
+        (.write wrtr (str k ", " v "\n"))))))
 
 (defn -main
   "I don't do a whole lot ... yet."
