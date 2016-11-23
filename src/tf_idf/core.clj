@@ -3,22 +3,26 @@
             [clojure.string :as st])
   (:gen-class))
 
-;; currently removes accented characters like: â, ê, etc.
-(def non-word-regex #"[^(? )\w]")
+(def non-word-regex
+  "regular expression for finding all non-word characters and leaving spaces for delimiting"
+  #"(?![a-zA-Z0-9À-ÿ ])(\W)")
 
 (defn get-basename-string [s]
   "get basename of (string) file"
   (re-find (re-pattern ".*[^.txt]") s))
 
 (defn clean-file [f]
+  "remove non-word characters and replace with '' and change everything to lowercase in a file"
   (-> (slurp f)
       (st/replace non-word-regex "")
       st/lower-case))
 
 (defn get-terms-list [s]
-  (st/split s #" "))
+  "delimit string by space (' ') and remove '' characters"
+  (remove #{""} (st/split s #" ")))
 
 (defn get-in-terms [m]
+  "return the terms associated with a file"
   (get-in m [:terms]))
 
 (defn per-term-doc-count [m]
@@ -66,16 +70,16 @@
       tf-idf-map)))
 
 (defn output-to-file [m]
+  "write each term and respective tf-idf value in the respective output file (one per line comma-delimited)"
   (let [base-file-name (get-basename-string (get m :file))
-        output-file (str (System/getProperty "user.dir") "/output/" base-file-name "-output.txt")]
+        output-file (str (System/getProperty "user.dir") "/output/" base-file-name "-output.csv")]
     (.mkdir (io/file (.getParent (io/file output-file))))
     (with-open [wrtr (io/writer output-file)]
       (doseq [[k v] (get m :tf-idf)]
-        (.write wrtr (str k ", " v "\n"))))))
+        (.write wrtr (str k "," v "\n"))))))
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
+(defn -main [& args]
+  "calculate tf-idf for terms in a user-provided directory and write to files in an output directory"
   (println "Provide a directory:")
   (let [files (.listFiles (io/file (read-line)))
         term-tf (doall (map get-tf files))
