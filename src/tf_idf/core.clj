@@ -1,6 +1,7 @@
 (ns tf-idf.core
   (:require [clojure.java.io :as io]
-            [clojure.string :as st])
+            [clojure.string :as st]
+            [clj-time.core :as tcore])
   (:gen-class))
 
 (def non-word-regex
@@ -89,9 +90,12 @@
   "calculate tf-idf for terms in a user-provided directory and write to files in an output directory"
   (println "Provide a directory:")
   (let [files (.listFiles (io/file (read-line)))
+        start (tcore/now)
         term-tf (doall (map get-tf files))
         all-terms (per-term-doc-count term-tf)
         term-idf (get-idf term-tf)
-        term-tf-idf (get-tf-idf term-tf term-idf)]
+        term-tf-idf (get-tf-idf term-tf term-idf)
+        elapsed-in-millis (tcore/in-millis (tcore/interval start (tcore/now)))]
     ;; term-tf-idf))
-    (pmap output-to-file term-tf-idf)))
+    (doall (pmap output-to-file term-tf-idf))
+    (printf "Calculated tf-idf for %d files in %d msecs\n" (count files) elapsed-in-millis)))
