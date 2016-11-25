@@ -82,3 +82,70 @@
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log (float (/ 6 1))), "b" (Math/log (float (/ 6 4)))})
                              {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log (float (/ 6 1)))), "b" (* (float (/ 1 4)) (Math/log (float (/ 6 4)))) }}))))
 
+(deftest test-get-tf
+  (testing "get-tf"
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc1.txt")) {:file "test-doc1.txt" :terms (calculate-tf {"hello" 1,
+                                                                                                                  "there" 1,
+                                                                                                                  "how" 1,
+                                                                                                                  "are" 1,
+                                                                                                                  "you" 1,
+                                                                                                                  "today" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc2.txt")) {:file "test-doc2.txt" :terms (calculate-tf {"h" 1,
+                                                                                                                  "e" 1,
+                                                                                                                  "l" 2,
+                                                                                                                  "o" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc3.txt")) {:file "test-doc3.txt" :terms (calculate-tf {"c" 1,
+                                                                                                                  "o" 1,
+                                                                                                                  "l" 1,
+                                                                                                                  "to" 1,
+                                                                                                                  "n" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc4.txt")) {:file "test-doc4.txt" :terms (calculate-tf {"çolton" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc5.txt")) {:file "test-doc5.txt" :terms (calculate-tf {"my" 1,
+                                                                                                                  "name" 1,
+                                                                                                                  "again" 1,
+                                                                                                                  "cçolto" 1,
+                                                                                                                  "n" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc6.txt")) {:file "test-doc6.txt" :terms (calculate-tf {"hello" 2,
+                                                                                                                  "there" 1,
+                                                                                                                  "bobby" 3,
+                                                                                                                  "mccurdy" 1,
+                                                                                                                  "adasd" 1,
+                                                                                                                  "ç" 2,
+                                                                                                                  "çç" 1,
+                                                                                                                  "bçiadf" 1,
+                                                                                                                  "colton" 1,
+                                                                                                                  "this" 1,
+                                                                                                                  "is" 1,
+                                                                                                                  "asdf" 1,
+                                                                                                                  "a" 1,
+                                                                                                                  "asdft2132" 1,
+                                                                                                                  "test0" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc7.txt")) {:file "test-doc7.txt" :terms (calculate-tf {"colton" 3,
+                                                                                                                  "asf" 1,
+                                                                                                                  "atest" 1,
+                                                                                                                  "ç" 1,
+                                                                                                                  "çç" 2,
+                                                                                                                  "hello" 1,
+                                                                                                                  "bçiadf" 1,
+                                                                                                                  "coççlton" 1,
+                                                                                                                  "more" 1,
+                                                                                                                  "coltons" 2,
+                                                                                                                  "newline" 1,
+                                                                                                                  "gotta" 1,
+                                                                                                                  "catch" 1,
+                                                                                                                  "them" 1,
+                                                                                                                  "all" 1,
+                                                                                                                  "another" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc8.txt")) {:file "test-doc8.txt" :terms (calculate-tf {"colton" 5})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc9.txt")) {:file "test-doc9.txt" :terms (calculate-tf {"colton" 4,
+                                                                                                                  "mccurdy" 1})}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc10.txt")) {:file "test-doc10.txt" :terms (calculate-tf {})}))))
+
+(deftest test-get-idf
+  (testing "get-idf"
+    (let [group1 (get-tf (clojure.java.io/file "test-data/test-doc1.txt"))
+          group2 (doall (map get-tf [(clojure.java.io/file "test-data/test-doc1.txt"), (clojure.java.io/file "test-data/test-doc2.txt")]))
+          group3 (doall (map get-tf [(clojure.java.io/file "test-data/test-doc1.txt"), (clojure.java.io/file "test-data/test-doc2.txt"), (clojure.java.io/file "test-data/test-doc3.txt")]))]
+    (is (= (get-idf group1) (calculate-idf (per-term-doc-count group1) 1)))
+    (is (= (get-idf group2) (calculate-idf (per-term-doc-count group2) 2)))
+    (is (= (get-idf group3) (calculate-idf (per-term-doc-count group3) 3))))))
