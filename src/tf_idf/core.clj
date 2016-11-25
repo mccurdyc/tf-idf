@@ -5,16 +5,18 @@
 
 (def non-word-regex
   "regular expression for finding all non-word characters and leaving spaces for delimiting"
-  #"(?![a-zA-Z0-9À-ÿ ])(\W)")
+  #"(?![a-zA-Z0-9À-ÿ\s])(\W)")
 
 (defn get-basename-string [s]
   "get basename of (string) file"
-  (re-find (re-pattern ".*[^.txt]") s))
+  (re-find (re-pattern "^[a-zA-Z0-9À-ÿ ()]+") s))
+  ;; (re-find (re-pattern ".*[^.txt]") s))
 
 (defn clean-file [f]
   "remove non-word characters and replace with '' and change everything to lowercase in a file"
   (-> (slurp f)
       (st/replace non-word-regex "")
+      (st/replace #"\s" " ")
       st/lower-case))
 
 (defn get-terms-list [s]
@@ -29,6 +31,10 @@
   "make list of all keys from nested maps"
   (frequencies (flatten (conj '() (map keys (map get-in-terms m))))))
 
+(defn sort-tf-idf [m]
+  "sort tf-idf values for each file from high to low"
+  (into {} #{(sort-by val > m)}))
+
 (defn calculate-tf [m]
   "divide occurrences of a term by the total number of terms in a single document"
   (reduce-kv (fn [n k v] (assoc n k (float (/ v (count m))))) (empty m) m))
@@ -40,9 +46,10 @@
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
   (let [file-name (get tf :file)
-        tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-in-terms tf))]
+        tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-in-terms tf))
+        sorted-tf-idf (sort-tf-idf tf-idf)]
     {:file file-name
-     :tf-idf tf-idf}))
+     :tf-idf sorted-tf-idf}))
 
 (defn get-tf [f]
   "remove punctuation from file. get all terms from file. get occurrences of each term. calculate term frequency."
@@ -86,4 +93,5 @@
         all-terms (per-term-doc-count term-tf)
         term-idf (get-idf term-tf)
         term-tf-idf (get-tf-idf term-tf term-idf)]
-    (map output-to-file term-tf-idf)))
+    ;; term-tf-idf))
+    (pmap output-to-file term-tf-idf)))
