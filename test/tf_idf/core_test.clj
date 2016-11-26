@@ -39,48 +39,53 @@
                                  {:file "test1.txt" :terms {"e" 13, "c" 11, "f" 3, "a" 2}},
                                  {:file "test2.txt" :terms {"a" 2, "c" 6, "d" 3}})) {"a" 3, "b" 1, "c" 3, "d" 1, "e" 1, "f" 1}))))
 
-(deftest test-sort-tf-idf
-  (testing "sort-tf-idf"
-    (is (= (sort-tf-idf {"a" 1, "b" 2, "c" 3}) {"c" 3, "b" 2, "a" 1}))
-    (is (= (sort-tf-idf {"e" 2, "f" 12, "d" 3, "a" 1, "b" 1, "c" 2}) {"f" 12, "d" 3, "e" 2, "c" 2, "a" 1, "b" 1}))))
+(deftest test-sort-values
+  (testing "sort-values"
+    (is (= (sort-values {"a" 1, "b" 2, "c" 3}) {"c" 3, "b" 2, "a" 1}))
+    (is (= (sort-values {"e" 2, "f" 12, "d" 3, "a" 1, "b" 1, "c" 2}) {"f" 12, "d" 3, "e" 2, "c" 2, "a" 1, "b" 1}))
+    (is (= (sort-values {"a" 0.1, "b" 0.2, "c" 0.3}) {"c" 0.3, "b" 0.2, "a" 0.1}))
+    (is (= (sort-values {"a" 0.34567, "b" 0.21111, "c" 0.00001}) {"a" 0.34567, "b" 0.21111, "c" 0.00001}))
+    (is (= (sort-values {"c" 0.00001, "a" 0.34567, "b" 0.21111}) {"a" 0.34567, "b" 0.21111, "c" 0.00001}))
+    (is (= (sort-values {"c" 0.54321, "a" 0.23456, "b" 0.21111, "d" 0.00000}) {"c" 0.54321, "a" 0.23456 "b" 0.21111, "d" 0.00000}))
+    (is (= (sort-values {"c" 0.00000, "a" 0.00000, "b" 0.00000, "d" 0.00000}) {"c" 0.00000, "a" 0.00000 "b" 0.00000, "d" 0.00000}))))
 
 (deftest test-calculate-tf
   (testing "calculate-tf"
-    (is (= (calculate-tf {"a" 3, "b" 3, "c" 3}) {"a" 1.0, "b" 1.0, "c" 1.0}))
-    (is (= (calculate-tf {"a" 3, "b" 2, "c" 1}) {"a" (float (/ 3 3)), "b" (float (/ 2 3)), "c" (float (/ 1 3))}))
-    (is (= (calculate-tf {"a" 10, "b" 4, "c" 1, "d" 23, "e" 100}) {"a" (float (/ 10 5)), "b" (float (/ 4 5)), "c" (float (/ 1 5)), "d" (float (/ 23 5)), "e" (float (/ 100 5))}))))
+    (is (= (calculate-tf {"a" 3, "b" 3, "c" 3} 9) {"a" (float (/ 3 9)), "b" (float (/ 3 9)), "c" (float (/ 3 9))}))
+    (is (= (calculate-tf {"a" 3, "b" 2, "c" 1} 6) {"a" (float (/ 3 6)), "b" (float (/ 2 6)), "c" (float (/ 1 6))}))
+    (is (= (calculate-tf {"a" 10, "b" 4, "c" 1, "d" 23, "e" 100} 138) {"a" (float (/ 10 138)), "b" (float (/ 4 138)), "c" (float (/ 1 138)), "d" (float (/ 23 138)), "e" (float (/ 100 138))}))))
 
 (deftest test-calculate-idf
   (testing "calculate-idf"
     (is (= (calculate-idf {"a" 3, "b" 3, "c" 3} 3) {"a" 0.0, "b" 0.0, "c" 0.0}))
-    (is (= (calculate-idf {"a" 3, "b" 3, "c" 3} 6) {"a" (Math/log (float (/ 6 3))), "b" (Math/log (float (/ 6 3))), "c" (Math/log (float (/ 6 3)))}))
-    (is (= (calculate-idf {"a" 3, "b" 2, "c" 1} 5) {"a" (Math/log (float (/ 5 3))), "b" (Math/log (float (/ 5 2))), "c" (Math/log (float (/ 5 1)))}))
-    (is (= (calculate-idf {"a" 10, "b" 11, "c" 13} 6) {"a" (Math/log (float (/ 6 10))), "b" (Math/log (float (/ 6 11))), "c" (Math/log (float (/ 6 13)))}))
-    (is (= (calculate-idf {"a" 10, "b" 11, "c" 13} 20) {"a" (Math/log (float (/ 20 10))), "b" (Math/log (float (/ 20 11))), "c" (Math/log (float (/ 20 13)))}))))
+    (is (= (calculate-idf {"a" 3, "b" 3, "c" 3} 6) {"a" (Math/log10 (float (/ 6 3))), "b" (Math/log10 (float (/ 6 3))), "c" (Math/log10 (float (/ 6 3)))}))
+    (is (= (calculate-idf {"a" 3, "b" 2, "c" 1} 5) {"a" (Math/log10 (float (/ 5 3))), "b" (Math/log10 (float (/ 5 2))), "c" (Math/log10 (float (/ 5 1)))}))
+    (is (= (calculate-idf {"a" 10, "b" 11, "c" 13} 6) {"a" (Math/log10 (float (/ 6 10))), "b" (Math/log10 (float (/ 6 11))), "c" (Math/log10 (float (/ 6 13)))}))
+    (is (= (calculate-idf {"a" 10, "b" 11, "c" 13} 20) {"a" (Math/log10 (float (/ 20 10))), "b" (Math/log10 (float (/ 20 11))), "c" (Math/log10 (float (/ 20 13)))}))))
 
 (deftest test-calculate-tf-idf
   (testing "calculate-tf-idf"
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log (float (/ 3 3)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (Math/log 2.0)}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log (float (/ 6 6)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 1 3)) (Math/log 2.0))}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 3))}} {"a" (Math/log (float (/ 6 4)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 2 3)) (Math/log (float (/ 6 4))))}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log (float (/ 6 6))), "b" (Math/log (float (/ 6 6)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log (float (/ 6 6)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log (float (/ 6 3))), "b" (Math/log (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log (float (/ 6 3)))), "b" (* (float (/ 2 4)) (Math/log (float (/ 6 3)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log (float (/ 6 6))), "b" (Math/log (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log (float (/ 6 3)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log (float (/ 6 1))), "b" (Math/log (float (/ 6 4)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log (float (/ 6 1)))), "b" (* (float (/ 2 4)) (Math/log (float (/ 6 4)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log (float (/ 6 6))), "b" (Math/log (float (/ 6 6)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log (float (/ 6 6)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log (float (/ 6 3))), "b" (Math/log (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log (float (/ 6 3)))), "b" (* (float (/ 1 4)) (Math/log (float (/ 6 3)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log (float (/ 6 6))), "b" (Math/log (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log (float (/ 6 3)))) }}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log (float (/ 6 1))), "b" (Math/log (float (/ 6 4)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log (float (/ 6 1)))), "b" (* (float (/ 1 4)) (Math/log (float (/ 6 4)))) }}))))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 3 3)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (Math/log10 2.0)}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 6)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 1 3)) (Math/log10 2.0))}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 3))}} {"a" (Math/log10 (float (/ 6 4)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 2 3)) (Math/log10 (float (/ 6 4))))}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 6)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 3))), "b" (Math/log10 (float (/ 6 3)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 3)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 1))), "b" (Math/log10 (float (/ 6 4)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 1)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 4)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 6)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 6)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 3))), "b" (Math/log10 (float (/ 6 3)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 3)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 3)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 3)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 3)))) }}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 1))), "b" (Math/log10 (float (/ 6 4)))})
+                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 1)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 4)))) }}))))
 
 (deftest test-get-tf
   (testing "get-tf"
@@ -89,22 +94,22 @@
                                                                                                                   "how" 1,
                                                                                                                   "are" 1,
                                                                                                                   "you" 1,
-                                                                                                                  "today" 1})}))
+                                                                                                                  "today" 1} (count (get-terms-list (clean-file "test-data/test-doc1.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc2.txt")) {:file "test-doc2.txt" :terms (calculate-tf {"h" 1,
                                                                                                                   "e" 1,
                                                                                                                   "l" 2,
-                                                                                                                  "o" 1})}))
+                                                                                                                  "o" 1} (count (get-terms-list (clean-file "test-data/test-doc2.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc3.txt")) {:file "test-doc3.txt" :terms (calculate-tf {"c" 1,
                                                                                                                   "o" 1,
                                                                                                                   "l" 1,
                                                                                                                   "to" 1,
-                                                                                                                  "n" 1})}))
-    (is (= (get-tf (clojure.java.io/file "test-data/test-doc4.txt")) {:file "test-doc4.txt" :terms (calculate-tf {"çolton" 1})}))
+                                                                                                                  "n" 1} (count (get-terms-list (clean-file "test-data/test-doc3.txt"))))}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc4.txt")) {:file "test-doc4.txt" :terms (calculate-tf {"çolton" 1} (count (get-terms-list (clean-file "test-data/test-doc4.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc5.txt")) {:file "test-doc5.txt" :terms (calculate-tf {"my" 1,
                                                                                                                   "name" 1,
                                                                                                                   "again" 1,
                                                                                                                   "cçolto" 1,
-                                                                                                                  "n" 1})}))
+                                                                                                                  "n" 1} (count (get-terms-list (clean-file "test-data/test-doc5.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc6.txt")) {:file "test-doc6.txt" :terms (calculate-tf {"hello" 2,
                                                                                                                   "there" 1,
                                                                                                                   "bobby" 3,
@@ -119,7 +124,7 @@
                                                                                                                   "asdf" 1,
                                                                                                                   "a" 1,
                                                                                                                   "asdft2132" 1,
-                                                                                                                  "test0" 1})}))
+                                                                                                                  "test0" 1} (count (get-terms-list (clean-file "test-data/test-doc6.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc7.txt")) {:file "test-doc7.txt" :terms (calculate-tf {"colton" 3,
                                                                                                                   "asf" 1,
                                                                                                                   "atest" 1,
@@ -135,11 +140,11 @@
                                                                                                                   "catch" 1,
                                                                                                                   "them" 1,
                                                                                                                   "all" 1,
-                                                                                                                  "another" 1})}))
-    (is (= (get-tf (clojure.java.io/file "test-data/test-doc8.txt")) {:file "test-doc8.txt" :terms (calculate-tf {"colton" 5})}))
+                                                                                                                  "another" 1} (count (get-terms-list (clean-file "test-data/test-doc7.txt"))))}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc8.txt")) {:file "test-doc8.txt" :terms (calculate-tf {"colton" 5} (count (get-terms-list (clean-file "test-data/test-doc8.txt"))))}))
     (is (= (get-tf (clojure.java.io/file "test-data/test-doc9.txt")) {:file "test-doc9.txt" :terms (calculate-tf {"colton" 4,
-                                                                                                                  "mccurdy" 1})}))
-    (is (= (get-tf (clojure.java.io/file "test-data/test-doc10.txt")) {:file "test-doc10.txt" :terms (calculate-tf {})}))))
+                                                                                                                  "mccurdy" 1} (count (get-terms-list (clean-file "test-data/test-doc9.txt"))))}))
+    (is (= (get-tf (clojure.java.io/file "test-data/test-doc10.txt")) {:file "test-doc10.txt" :terms (calculate-tf {} (count (get-terms-list (clean-file "test-data/test-doc10.txt"))))}))))
 
 (deftest test-get-idf
   (testing "get-idf"
@@ -159,8 +164,8 @@
     (is (= (get-tf-idf '({:file "test1.txt" :terms {"a" 0.5, "b" 0.5}} {:file "test2.txt" :terms {"a" 0.2, "c" 0.8}}) {"a" 0.0, "b" 2.0, "c" 2.0})
           '({:file "test2.txt" :tf-idf {"c" 1.6, "a" 0.0}} {:file "test1.txt" :tf-idf {"b" 1.0, "a" 0.0}})))))
 
-(deftest test-output-to-file
-  (testing "output-to-file"
-    (output-to-file {:file "test-data/test-doc1.txt" :tf-idf {"a" 1, "b" 2}})
-    (is (and (if (.exists "output/test-doc1-output.txt") true false) (= (slurp "output/test-doc1-output.csv") "a,1\nb,2")))))
+;; (deftest test-output-to-file
+;;   (testing "output-to-file"
+;;     (output-to-file {:file "test-data/test-doc1.txt" :tf-idf {"a" 1, "b" 2}})
+;;     (is (and (if (.exists "output/test-doc1-output.txt") true false) (= (slurp "output/test-doc1-output.csv") "a,1\nb,2")))))
 
