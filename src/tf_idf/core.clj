@@ -1,7 +1,8 @@
 (ns tf-idf.core
   (:require [clojure.java.io :as io]
             [clojure.string :as st]
-            [clj-time.core :as tcore])
+            [clj-time.core :as tcore]
+            [clojure.tools.cli :refer [parse-opts]])
   (:gen-class))
 
 (def non-word-regex
@@ -42,8 +43,8 @@
   (reduce-kv (fn [n k v] (assoc n k (float (/ v (count m))))) (empty m) m))
 
 (defn calculate-idf [m c]
-  "divide total number of documents by number of documents with term. then, take the log_e"
-  (reduce-kv (fn [n k v] (assoc n k (Math/log (float (/ c v))))) (empty m) m))
+  "divide total number of documents by number of documents with term. then, take the log_10"
+  (reduce-kv (fn [n k v] (assoc n k (Math/log10 (float (/ c v))))) (empty m) m))
 
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
@@ -87,17 +88,31 @@
       (doseq [[k v] (get m :tf-idf)]
         (.write wrtr (str k "," v "\n"))))))
 
+(def cli-options
+  [["-d" "--directory DIRECTORY" "* [Required] Corpus (directory) for which tf-idf is to be calculated"
+    :validate [#(.exists(io/file %)) "I can't find this directory. Try providing the absolute path to the directory"]]
+   ["-h" "--help" "Print this help menu"
+    :default false]])
+
+(def required-opts #{:directory})
+
+(defn missing-required? [opts]
+  "Returns true if opts is missing any of the required-opts"
+  (not-every? opts required-opts))
+
 (defn -main [& args]
   "calculate tf-idf for terms in a user-provided directory and write to files in an output directory"
-  (println "Provide a directory:")
-  (let [files (.listFiles (io/file (read-line)))
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)
+        files (.listFiles (io/file (:directory options)))
         start (tcore/now)
         term-tf (doall (map get-tf files))
-        all-terms (per-term-doc-count term-tf)
         term-idf (get-idf term-tf)
         term-tf-idf (get-tf-idf term-tf term-idf)
         elapsed-in-millis (tcore/in-millis (tcore/interval start (tcore/now)))]
-    ;; term-tf-idf))
-    (doall (pmap output-to-file term-tf-idf))
-    (println (format "Calculated tf-idf for %d files in %d msecs" (count files) elapsed-in-millis)))
-  (System/exit 0))
+     (when (or (:help options)
+               (missing-required? options))
+        (println summary))
+    ;; (nth term-tf-idf 4)))
+    (dorun (map output-to-file term-tf-idf))
+    (println (format "Calculated tf-idf for %d files in %d msecs" (count files) elapsed-in-millis))))
+  ;; (System/exit 0))
