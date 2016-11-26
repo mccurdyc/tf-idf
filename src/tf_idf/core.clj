@@ -34,8 +34,8 @@
   "make list of all keys from nested maps"
   (frequencies (flatten (conj '() (map keys (map get-in-terms m))))))
 
-(defn sort-tf-idf [m]
-  "sort tf-idf values for each file from high to low"
+(defn sort-values [m]
+  "sort values from high to low"
   (into {} #{(sort-by val > m)}))
 
 (defn calculate-tf [m c]
@@ -50,7 +50,7 @@
   "calculate tf-idf (tf * idf) for a term"
   (let [file-name (get tf :file)
         tf-idf (reduce-kv (fn [n k v] (assoc n k (* v (get idf k)))) (empty tf) (get-in-terms tf))
-        sorted-tf-idf (sort-tf-idf tf-idf)]
+        sorted-tf-idf (sort-values tf-idf)]
     {:file file-name
      :tf-idf sorted-tf-idf}))
 
