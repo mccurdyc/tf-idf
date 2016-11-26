@@ -38,9 +38,9 @@
   "sort tf-idf values for each file from high to low"
   (into {} #{(sort-by val > m)}))
 
-(defn calculate-tf [m]
+(defn calculate-tf [m c]
   "divide occurrences of a term by the total number of terms in a single document"
-  (reduce-kv (fn [n k v] (assoc n k (float (/ v (count m))))) (empty m) m))
+  (reduce-kv (fn [n k v] (assoc n k (float (/ v c)))) (empty m) m))
 
 (defn calculate-idf [m c]
   "divide total number of documents by number of documents with term. then, take the log_10"
@@ -59,9 +59,10 @@
   (let [file-name (.getName f)
         file (clean-file f)
         term-list (get-terms-list file)
+        total-count (count term-list)
         term-counts (frequencies term-list)]
     {:file file-name
-     :terms (calculate-tf term-counts)}))
+     :terms (calculate-tf term-counts total-count)}))
 
 (defn get-idf [m]
   "count number of documents term occurs in then calculate inverse document frequency for terms"
@@ -86,7 +87,7 @@
     (.mkdir (io/file (.getParent (io/file output-file))))
     (with-open [wrtr (io/writer output-file)]
       (doseq [[k v] (get m :tf-idf)]
-        (.write wrtr (str k "," v "\n"))))))
+        (.write wrtr (str k "," (format "%.5f" v) "\n"))))))
 
 (def cli-options
   [["-d" "--directory DIRECTORY" "* [Required] Corpus (directory) for which tf-idf is to be calculated"
