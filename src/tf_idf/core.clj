@@ -99,5 +99,5 @@
         elapsed-in-millis (tcore/in-millis (tcore/interval start (tcore/now)))]
     ;; term-tf-idf))
     (doall (pmap output-to-file term-tf-idf))
-    (println (format "Calculated tf-idf for %d files in %d msecs\n" (count files) elapsed-in-millis)))
+    (println (format "Calculated tf-idf for %d files in %d msecs" (count files) elapsed-in-millis)))
   (System/exit 0))
