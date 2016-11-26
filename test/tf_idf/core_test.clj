@@ -159,8 +159,8 @@
     (is (= (get-tf-idf '({:file "test1.txt" :terms {"a" 0.5, "b" 0.5}} {:file "test2.txt" :terms {"a" 0.2, "c" 0.8}}) {"a" 0.0, "b" 2.0, "c" 2.0})
           '({:file "test2.txt" :tf-idf {"c" 1.6, "a" 0.0}} {:file "test1.txt" :tf-idf {"b" 1.0, "a" 0.0}})))))
 
-;; (deftest test-output-to-file
-;;   (testing "output-to-file"
-;;     (output-to-file {:file "test-data/test-doc1.txt" :tf-idf {"a" 1, "b" 2}})
-;;     (is (and (if (.exists "output/test-doc1-output.txt") true false) (= (slurp "output/test-doc1-output.csv") "a,1\nb,2")))))
-;;
+(deftest test-output-to-file
+  (testing "output-to-file"
+    (output-to-file {:file "test-data/test-doc1.txt" :tf-idf {"a" 1, "b" 2}})
+    (is (and (if (.exists "output/test-doc1-output.txt") true false) (= (slurp "output/test-doc1-output.csv") "a,1\nb,2")))))
+
