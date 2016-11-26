@@ -10,8 +10,9 @@
 
 (defn get-basename-string [s]
   "get basename of (string) file"
-  (re-find (re-pattern "^[a-zA-Z0-9À-ÿ ()]+") s))
-  ;; (re-find (re-pattern ".*[^.txt]") s))
+  (if-let [[_ basename] (re-matches #"(.*)\..*" s)]
+    basename
+    s))
 
 (defn clean-file [f]
   "remove non-word characters and replace with '' and change everything to lowercase in a file"
