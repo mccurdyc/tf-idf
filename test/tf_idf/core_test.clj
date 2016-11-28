@@ -2,6 +2,8 @@
   (:require [clojure.test :refer :all]
             [tf-idf.core :refer :all]))
 
+;; admittedly, I should have used functions to automatically generate test data.
+
 (deftest test-get-basename-string
   (testing "get-basename-string function"
     (is (= (get-basename-string "doc1.txt") "doc1"))
@@ -39,16 +41,6 @@
                                  {:file "test1.txt" :terms {"e" 13, "c" 11, "f" 3, "a" 2}},
                                  {:file "test2.txt" :terms {"a" 2, "c" 6, "d" 3}})) {"a" 3, "b" 1, "c" 3, "d" 1, "e" 1, "f" 1}))))
 
-(deftest test-sort-values
-  (testing "sort-values"
-    (is (= (sort-values {"a" 1, "b" 2, "c" 3}) {"c" 3, "b" 2, "a" 1}))
-    (is (= (sort-values {"e" 2, "f" 12, "d" 3, "a" 1, "b" 1, "c" 2}) {"f" 12, "d" 3, "e" 2, "c" 2, "a" 1, "b" 1}))
-    (is (= (sort-values {"a" 0.1, "b" 0.2, "c" 0.3}) {"c" 0.3, "b" 0.2, "a" 0.1}))
-    (is (= (sort-values {"a" 0.34567, "b" 0.21111, "c" 0.00001}) {"a" 0.34567, "b" 0.21111, "c" 0.00001}))
-    (is (= (sort-values {"c" 0.00001, "a" 0.34567, "b" 0.21111}) {"a" 0.34567, "b" 0.21111, "c" 0.00001}))
-    (is (= (sort-values {"c" 0.54321, "a" 0.23456, "b" 0.21111, "d" 0.00000}) {"c" 0.54321, "a" 0.23456 "b" 0.21111, "d" 0.00000}))
-    (is (= (sort-values {"c" 0.00000, "a" 0.00000, "b" 0.00000, "d" 0.00000}) {"c" 0.00000, "a" 0.00000 "b" 0.00000, "d" 0.00000}))))
-
 (deftest test-calculate-tf
   (testing "calculate-tf"
     (is (= (calculate-tf {"a" 3, "b" 3, "c" 3} 9) {"a" (float (/ 3 9)), "b" (float (/ 3 9)), "c" (float (/ 3 9))}))
@@ -65,27 +57,27 @@
 
 (deftest test-calculate-tf-idf
   (testing "calculate-tf-idf"
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 3 3)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (Math/log10 2.0)}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 6)))}) {:file "test.txt" :tf-idf {"a" 0.0}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 1 3)) (Math/log10 2.0))}}))
-    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 3))}} {"a" (Math/log10 (float (/ 6 4)))}) {:file "test.txt" :tf-idf {"a" (* (float (/ 2 3)) (Math/log10 (float (/ 6 4))))}}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 3 3)))}) {:file "test.txt" :tf-idf '(["a" 0.0])}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf '(["a" 0.3010299956639812])}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 6)))}) {:file "test.txt" :tf-idf '(["a" 0.0])}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 1 3))}} {"a" (Math/log10 (float (/ 6 3)))}) {:file "test.txt" :tf-idf '(["a" 0.10034333487845806])}))
+    (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 3))}} {"a" (Math/log10 (float (/ 6 4)))}) {:file "test.txt" :tf-idf '(["a"0.11739417620240647])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 6)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))) }}))
+                             {:file "test.txt" :tf-idf '(["a" 0.0], ["b" 0.0])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 3))), "b" (Math/log10 (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))) }}))
+                             {:file "test.txt" :tf-idf '(["a" 0.1505149978319906], ["b" 0.1505149978319906])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 3)))) }}))
+                             {:file "test.txt" :tf-idf '(["b" 0.1505149978319906], ["a" 0.0])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 2 4)), "b" (float (/ 2 4))}} {"a" (Math/log10 (float (/ 6 1))), "b" (Math/log10 (float (/ 6 4)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 2 4)) (Math/log10 (float (/ 6 1)))), "b" (* (float (/ 2 4)) (Math/log10 (float (/ 6 4)))) }}))
+                             {:file "test.txt" :tf-idf '(["a" 0.3890756251918218], ["b" 0.08804562952784062])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 6)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 6)))) }}))
+                             {:file "test.txt" :tf-idf '(["a" 0.0] , ["b" 0.0])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 3))), "b" (Math/log10 (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 3)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 3)))) }}))
+                             {:file "test.txt" :tf-idf '(["a" 0.22577249674798588] , ["b" 0.0752574989159953])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 6))), "b" (Math/log10 (float (/ 6 3)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 6)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 3)))) }}))
+                             {:file "test.txt" :tf-idf '(["b" 0.0752574989159953], ["a" 0.0])}))
     (is (= (calculate-tf-idf {:file "test.txt" :terms {"a" (float (/ 3 4)), "b" (float (/ 1 4))}} {"a" (Math/log10 (float (/ 6 1))), "b" (Math/log10 (float (/ 6 4)))})
-                             {:file "test.txt" :tf-idf {"a" (* (float (/ 3 4)) (Math/log10 (float (/ 6 1)))), "b" (* (float (/ 1 4)) (Math/log10 (float (/ 6 4)))) }}))))
+                             {:file "test.txt" :tf-idf '(["a" 0.5836134377877327], ["b" 0.04402281476392031])}))))
 
 (deftest test-get-tf
   (testing "get-tf"
@@ -158,14 +150,8 @@
 (deftest test-get-tf-idf
   (testing "get-tf-idf"
     (is (= (get-tf-idf '({:file "test1.txt" :terms {"a" 0.5}} {:file "test2.txt" :terms {"a" 0.2}}) {"a" 0.0})
-          '({:file "test2.txt" :tf-idf {"a" 0.0}} {:file "test1.txt" :tf-idf {"a" 0.0}})))
+          '({:file "test2.txt" :tf-idf (["a" 0.0])} {:file "test1.txt" :tf-idf (["a" 0.0])})))
     (is (= (get-tf-idf '({:file "test1.txt" :terms {"a" 0.5}} {:file "test2.txt" :terms {"b" 0.9}}) {"a" 2, "b" 2})
-          '({:file "test2.txt" :tf-idf {"b" 1.8}} {:file "test1.txt" :tf-idf {"a" 1.0}})))
+          '({:file "test2.txt" :tf-idf (["b" 1.8])} {:file "test1.txt" :tf-idf (["a" 1.0])})))
     (is (= (get-tf-idf '({:file "test1.txt" :terms {"a" 0.5, "b" 0.5}} {:file "test2.txt" :terms {"a" 0.2, "c" 0.8}}) {"a" 0.0, "b" 2.0, "c" 2.0})
-          '({:file "test2.txt" :tf-idf {"c" 1.6, "a" 0.0}} {:file "test1.txt" :tf-idf {"b" 1.0, "a" 0.0}})))))
-
-;; (deftest test-output-to-file
-;;   (testing "output-to-file"
-;;     (output-to-file {:file "test-data/test-doc1.txt" :tf-idf {"a" 1, "b" 2}})
-;;     (is (and (if (.exists "output/test-doc1-output.txt") true false) (= (slurp "output/test-doc1-output.csv") "a,1\nb,2")))))
-
+          '({:file "test2.txt" :tf-idf (["c" 1.6], ["a" 0.0])} {:file "test1.txt" :tf-idf (["b" 1.0], ["a" 0.0])})))))
