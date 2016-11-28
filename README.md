@@ -18,6 +18,16 @@ $ git clone https://github.com/mccurdyc/tf-idf.git
 
 ## Usage
 
+To see the help menu, either don't run the .jar file with any parameters or run it with the `-h` flag
+shown by the following command:
+
+```
+$ java -jar tf-idf.jar -h
+
+  -d, --directory DIRECTORY  * [Required] Corpus (directory) for which tf-idf is to be calculated
+  -h, --help                 Print this help menu
+```
+
 To calculate the term frequency-inverse document frequency for a corpus (or directory) use the `-d`
 or `--directory` flag with the absolute path to the directory as in the example below.
 
