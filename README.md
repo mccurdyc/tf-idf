@@ -18,24 +18,79 @@ $ git clone https://github.com/mccurdyc/tf-idf.git
 
 ## Usage
 
-FIXME: explanation
+To calculate the term frequency-inverse document frequency for a corpus (or directory) use the `-d`
+or `--directory` flag with the absolute path to the directory as in the example below.
 
-    $ java -jar tf-idf-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
+```
+$ java -jar tf-idf-0.1.0-standalone.jar -d /path/to/directory
+```
 
 ## Examples
 
 In this repository, I have provided a `data/` directory with sample text files for which you can
-test this tool on.
+test this tool. The sample directory contains the following files:
+
+```
+tf-idf
+└───data/
+  │   doc1.txt
+  │   doc2.txt
+  │   doc3.txt
+  │   doc4.txt
+  │   doc5.txt
+```
+
+This is necessary to demonstrate what the output directory structure will look like for a given
+input directory. To calculate the term frequency-inverse document frequency for this directory, type the
+following into a shell:
+
+```
+$ java -jar tf-idf-0.1.0-standalone.jar -d data/
+```
+
+This produces an `output/` directory in the root of the project. Included in this directory will be
+a comma-separated values file with the tf-idf values for each file included in the input directory.
+The output from the example command above will produce the following `output/` directory:
+
+```
+tf-idf
+└───data/
+│   doc1.txt
+│   doc2.txt
+│   doc3.txt
+│   doc4.txt
+│   doc5.txt
+│
+└───output/
+│   doc1-output.csv
+│   doc2-output.csv
+│   doc3-output.csv
+│   doc4-output.csv
+│   doc5-output.csv
+```
+
+A snippet from an output file `doc1-output.csv` produced, specifically for `doc1.txt`, will look like the following:
+
+```
+float,0.000631409
+million,0.001262818
+properties,0.000631409
+rigid,0.000359476
+minerals,0.000631409
+88,0.000631409
+392,0.000631409
+sedimentary,0.000631409
+percentage,0.000631409
+more,0.000400811
 ...
+```
 
 ## Development Environment
 
-The tf-idf has been created and run on an Arch Linux 4.8.10-1 workstation running Clojure 1.8.0 and the
-OPENJDK 1.8.0_112 version of Java #as well as ... . If you are unable to run this tool with your development tools and
+The tf-idf has been created and run on an Arch Linux 4.8.10-1 workstation with Clojure 1.8.0 and the
+OpenJDK 1.8.0_112 version of Java. It was also run on an Arch Linux 4.8.10-1 workstation with Oracle's
+Java SE Runtime Environment version 1.8.0_102, OpenJDK 1.7.0_111 version of Java. To further test the
+usability, this tf-idf calculator was also tested on MacOS If you are unable to run this tool with your development tools and
 your execution environment, then please open a new issue and I will attempt to resolve your concerns.
 
 ## License
