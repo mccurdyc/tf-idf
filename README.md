@@ -22,7 +22,7 @@ To calculate the term frequency-inverse document frequency for a corpus (or dire
 or `--directory` flag with the absolute path to the directory as in the example below.
 
 ```
-$ java -jar tf-idf-0.1.0-standalone.jar -d /path/to/directory
+$ java -jar tf-idf.jar -d /path/to/directory
 ```
 
 ## Examples
@@ -45,7 +45,7 @@ input directory. To calculate the term frequency-inverse document frequency for 
 following into a shell:
 
 ```
-$ java -jar tf-idf-0.1.0-standalone.jar -d data/
+$ java -jar tf-idf.jar -d data
 ```
 
 This produces an `output/` directory in the root of the project. Included in this directory will be
@@ -72,16 +72,16 @@ tf-idf
 A snippet from an output file `doc1-output.csv` produced, specifically for `doc1.txt`, will look like the following:
 
 ```
-float,0.000631409
-million,0.001262818
-properties,0.000631409
-rigid,0.000359476
-minerals,0.000631409
-88,0.000631409
-392,0.000631409
-sedimentary,0.000631409
-percentage,0.000631409
-more,0.000400811
+crust,0.029044825
+continental,0.008839729
+mantle,0.008208320
+billion,0.006945501
+earth,0.006314092
+oceanic,0.006314092
+moon,0.005682683
+rocks,0.005051274
+km,0.004419865
+underlying,0.004419865
 ...
 ```
 
@@ -89,8 +89,9 @@ more,0.000400811
 
 The tf-idf has been created and run on an Arch Linux 4.8.10-1 workstation with Clojure 1.8.0 and the
 OpenJDK 1.8.0_112 version of Java. It was also run on an Arch Linux 4.8.10-1 workstation with Oracle's
-Java SE Runtime Environment version 1.8.0_102, OpenJDK 1.7.0_111 version of Java. To further test the
-usability, this tf-idf calculator was also tested on MacOS If you are unable to run this tool with your development tools and
+Java SE Runtime Environment version 1.8.0_102 as well as OpenJDK 1.7.0_111 version of Java. To further ensure
+usability, this tf-idf calculator was run on a Mid-2012 MacBook Pro running MacOS Sierra (Version 10.12.1)
+with Oracle's Java SE Runtime Environment version 1.8.0_66. If you are unable to run this tool with your development tools and
 your execution environment, then please open a new issue and I will attempt to resolve your concerns.
 
 ## License
