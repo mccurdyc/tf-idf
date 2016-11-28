@@ -41,13 +41,13 @@
 
 (defn calculate-tf [m c]
   "divide occurrences of a term by the total number of terms in a single document"
-  (reduce-kv (fn [n k v] (assoc n k (/ v c))) (empty m) m))
-  ;; (reduce-kv (fn [n k v] (assoc n k (float (/ v c)))) (empty m) m))
+  ;; (reduce-kv (fn [n k v] (assoc n k (/ v c))) (empty m) m))
+  (reduce-kv (fn [n k v] (assoc n k (float (/ v c)))) (empty m) m))
 
 (defn calculate-idf [m c]
   "divide total number of documents by number of documents with term. then, take the log_10"
-  (reduce-kv (fn [n k v] (assoc n k (Math/log10 (/ c v)))) (empty m) m))
-  ;; (reduce-kv (fn [n k v] (assoc n k (float (Math/log10 (/ c v))))) (empty m) m))
+  ;; (reduce-kv (fn [n k v] (assoc n k (Math/log10 (/ c v)))) (empty m) m))
+  (reduce-kv (fn [n k v] (assoc n k (Math/log10 (float (/ c v))))) (empty m) m))
 
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
