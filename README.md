@@ -3,7 +3,7 @@
 A term frequency-inverse document frequency (tf-idf) calculator written in Clojure.
 
 To learn more about calculating and the uses of tf-idf visit
-(http://www.tfidf.com/)[http://www.tfidf.com/]. Additionally, this resource provides a clarifying
+[www.tfidf.com](http://www.tfidf.com/). Additionally, this resource provides a clarifying
 example.
 
 ## Installation
