@@ -101,8 +101,10 @@ The tf-idf has been created and run on an Arch Linux 4.8.10-1 workstation with C
 OpenJDK 1.8.0_112 version of Java. It was also run on an Arch Linux 4.8.10-1 workstation with Oracle's
 Java SE Runtime Environment version 1.8.0_102 as well as OpenJDK 1.7.0_111 version of Java. To further ensure
 usability, this tf-idf calculator was run on a Mid-2012 MacBook Pro running MacOS Sierra (Version 10.12.1)
-with Oracle's Java SE Runtime Environment version 1.8.0_66. If you are unable to run this tool with your development tools and
-your execution environment, then please open a new issue and I will attempt to resolve your concerns.
+with Oracle's Java SE Runtime Environment version 1.8.0_66. Finally, I ran this tool on a machine running
+Ubuntu 16.04 LTS running Oracle's Java SE Runtime Environment version 1.8.0_111. If you are unable to
+run this tool with your development tools and your execution environment, then please open a new issue
+and I will attempt to resolve your concerns.
 
 ## License
 
