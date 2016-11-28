@@ -36,15 +36,18 @@
 
 (defn sort-values [m]
   "sort values from high to low"
-  (into {} #{(sort-by val > m)}))
+  (reduce (fn [n v] (assoc n (first v) (second v))) {} (sort-by val > m)))
+  ;; (into {} #{(sort-by val > m)}))
 
 (defn calculate-tf [m c]
   "divide occurrences of a term by the total number of terms in a single document"
-  (reduce-kv (fn [n k v] (assoc n k (float (/ v c)))) (empty m) m))
+  (reduce-kv (fn [n k v] (assoc n k (/ v c))) (empty m) m))
+  ;; (reduce-kv (fn [n k v] (assoc n k (float (/ v c)))) (empty m) m))
 
 (defn calculate-idf [m c]
   "divide total number of documents by number of documents with term. then, take the log_10"
-  (reduce-kv (fn [n k v] (assoc n k (Math/log10 (float (/ c v))))) (empty m) m))
+  (reduce-kv (fn [n k v] (assoc n k (Math/log10 (/ c v)))) (empty m) m))
+  ;; (reduce-kv (fn [n k v] (assoc n k (float (Math/log10 (/ c v))))) (empty m) m))
 
 (defn calculate-tf-idf [tf idf]
   "calculate tf-idf (tf * idf) for a term"
@@ -87,13 +90,13 @@
     (.mkdir (io/file (.getParent (io/file output-file))))
     (with-open [wrtr (io/writer output-file)]
       (doseq [[k v] (get m :tf-idf)]
-        (.write wrtr (str k "," (format "%.5f" v) "\n"))))))
+        (.write wrtr (str k "," (format "%.9f" v) "\n"))))))
 
 (def cli-options
   [["-d" "--directory DIRECTORY" "* [Required] Corpus (directory) for which tf-idf is to be calculated"
-    :validate [#(.exists(io/file %)) "I can't find this directory. Try providing the absolute path to the directory"]]
+    :validate [#(and (.exists (io/file %)) (.isDirectory (io/file %))) "I can't find this directory. Try providing the absolute path to the directory"]]
    ["-h" "--help" "Print this help menu"
-    :default false]])
+    :default true]])
 
 (def required-opts #{:directory})
 
@@ -103,17 +106,18 @@
 
 (defn -main [& args]
   "calculate tf-idf for terms in a user-provided directory and write to files in an output directory"
-  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)
-        files (.listFiles (io/file (:directory options)))
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+     (if-not (nil? (:directory options))
+  (let [files (.listFiles (io/file (:directory options)))
         start (tcore/now)
         term-tf (doall (map get-tf files))
         term-idf (get-idf term-tf)
         term-tf-idf (get-tf-idf term-tf term-idf)
         elapsed-in-millis (tcore/in-millis (tcore/interval start (tcore/now)))]
+    (dorun (map output-to-file term-tf-idf))
+    (println (format "Calculated tf-idf for %d files in %d msecs" (count files) elapsed-in-millis)))
      (when (or (:help options)
                (missing-required? options))
-        (println summary))
-    ;; (nth term-tf-idf 4)))
-    (dorun (map output-to-file term-tf-idf))
-    (println (format "Calculated tf-idf for %d files in %d msecs" (count files) elapsed-in-millis))))
+        (println summary)))))
+  ;; (println "Invalid input directory. Please, try adding absolute path."))))
   ;; (System/exit 0))
